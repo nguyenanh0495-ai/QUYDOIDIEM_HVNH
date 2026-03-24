@@ -69,17 +69,25 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h5 class="border-bottom pb-2 mb-3 text-secondary">Hình thức quy đổi</h5>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="type" id="chkCourse" value="course" checked onchange="toggleFields()">
-                        <label class="form-check-label" for="chkCourse">Quy đổi giữa các Học phần</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="type" id="chkCert" value="certificate" onchange="toggleFields()">
-                        <label class="form-check-label" for="chkCert">Quy đổi Chứng chỉ (IELTS/IC3...)</label>
-                    </div>
-                </div>
+               <div class="mb-4">
+    <h5 class="border-bottom pb-2 mb-3 text-secondary">Hình thức quy đổi</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-bold">Chọn hình thức quy đổi</label>
+            <select id="transferType" class="form-select" onchange="toggleFields()" required>
+                <option value="">-- Chọn hình thức --</option>
+                <option value="hvnh">Quy đổi học phần từ kết quả học tập tại Học viện Ngân hàng</option>
+                <option value="other">Quy đổi học phần từ kết quả học tập tại Cơ sở đào tạo khác</option>
+                <option value="gdqp">Quy đổi học phần từ chứng chỉ GDQP</option>
+                <option value="professional">Quy đổi học phần từ chứng chỉ nghề nghiệp</option>
+            </select>
+        </div>
+        <div class="col-md-6" id="oldInstitutionBlock" style="display: none;">
+            <label class="form-label fw-bold">Cơ sở đào tạo cũ</label>
+            <input type="text" id="oldInstitution" class="form-control" placeholder="Nhập tên cơ sở đào tạo">
+        </div>
+    </div>
+</div>
 
                 <div id="transferDetails">
                     <h5 class="border-bottom pb-2 mb-3 text-secondary">Chi tiết Đề xuất Quy đổi</h5>
@@ -238,7 +246,16 @@
         container.appendChild(clone);
     }
 
-    function toggleFields() { }
+   function toggleFields() {
+    const transferType = document.getElementById('transferType').value;
+    const oldInstitutionBlock = document.getElementById('oldInstitutionBlock');
+    
+    if (transferType === 'other') {
+        oldInstitutionBlock.style.display = 'block';
+    } else {
+        oldInstitutionBlock.style.display = 'none';
+    }
+}
 
     document.getElementById('transferForm').addEventListener('submit', function(e) {
         e.preventDefault();
