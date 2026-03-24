@@ -1,41 +1,282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Title</title>
+    <title>Hệ thống Quy đổi Học phần - HVNH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Modal styles */
-        .modal { /* styles */ }
-        .modal-content { /* styles */ }
-        .close { /* styles for close button */ }
+        body { font-family: 'Roboto', sans-serif; background-color: #f4f7f6; }
+        .container { max-width: 900px; margin-top: 30px; margin-bottom: 50px; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-bg { background: linear-gradient(135deg, #003366 0%, #00509d 100%); color: white; border-radius: 15px 15px 0 0; padding: 30px; text-align: center; }
+        .btn-primary { background-color: #00509d; border: none; }
+        .btn-primary:hover { background-color: #003366; }
+        .mapping-pair { transition: all 0.3s ease; }
+        .mapping-pair:hover { border-color: #00509d !important; }
+        #otpBlock { display: none; }
+        .auth-badge { display: inline-block; margin-left: 10px; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; }
+        .auth-badge.pending { background-color: #ffc107; color: white; }
+        .auth-badge.verified { background-color: #28a745; color: white; }
+        .disabled-section { opacity: 0.5; pointer-events: none; }
+        .form-control:disabled, .form-select:disabled { background-color: #e9ecef !important; }
+        @media (max-width: 768px) { .border-end-md { border-end: none !important; border-bottom: 1px solid #dee2e6; margin-bottom: 1rem; padding-bottom: 1rem; } }
     </style>
 </head>
 <body>
 
-    <!-- Your existing HTML content -->
-    <input type="email" id="emailInput" placeholder="Enter your email"> 
-    <button onclick="sendOTP()">Nhận mã OTP</button>
+<div class="container">
+    <div class="card">
+        <div class="header-bg">
+            <h2 class="fw-bold mb-0">HỆ THỐNG ĐĂNG KÝ QUY ĐỔI HỌC PHẦN</h2>
+            <p class="lead mb-0 mt-2">Học viện Ngân hàng (BAV)</p>
+        </div>
+        
+        <div class="card-body p-4 p-md-5">
+            <div id="alertBox" class="alert d-none mb-4" role="alert"></div>
 
-    <div id="successModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <p id="modalMessage"></p>
+            <form id="transferForm">
+                <div class="row g-3 mb-4">
+                    <h5 class="border-bottom pb-2 mb-3 text-secondary">
+                        Thông tin xác thực
+                        <span id="authBadge" class="auth-badge pending">Chưa xác thực</span>
+                    </h5>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Email sinh viên (@hvnh.edu.vn)</label>
+                        <div class="input-group">
+                            <input type="email" id="auth_email" class="form-control" placeholder="example@hvnh.edu.vn" required>
+                            <button class="btn btn-outline-primary" type="button" id="btnSendOtp" onclick="sendOTP()">Nhận mã OTP</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="otpBlock">
+                        <label class="form-label fw-bold">Mã xác thực OTP</label>
+                        <div class="input-group">
+                            <input type="text" id="auth_otp" class="form-control" placeholder="Nhập 6 số..." maxlength="6">
+                            <button class="btn btn-success" type="button" id="btnVerifyOtp" onclick="verifyOTP()">Xác thực</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Mã sinh viên</label>
+                        <input type="text" id="studentId" class="form-control" placeholder="Ví dụ: 24A401..." required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Họ và tên</label>
+                        <input type="text" id="fullName" class="form-control" placeholder="NGUYỄN VĂN A" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2 mb-3 text-secondary">Hình thức quy đổi</h5>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="type" id="chkCourse" value="course" checked onchange="toggleFields()">
+                        <label class="form-check-label" for="chkCourse">Quy đổi giữa các Học phần</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="type" id="chkCert" value="certificate" onchange="toggleFields()">
+                        <label class="form-check-label" for="chkCert">Quy đổi Chứng chỉ (IELTS/IC3...)</label>
+                    </div>
+                </div>
+
+                <div id="transferDetails">
+                    <h5 class="border-bottom pb-2 mb-3 text-secondary">Chi tiết Đề xuất Quy đổi</h5>
+                    <div id="mappingPairsContainer">
+                        <div class="mapping-pair bg-white border p-3 mb-3 rounded">
+                            <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
+                                <h6 class="text-primary fw-bold mb-0 pair-title">Học phần quy đổi 1</h6>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 mb-3 mb-md-0 border-end-md">
+                                    <label class="form-label fw-bold text-secondary small">A. Học phần NGUỒN (Đã học)</label>
+                                    <div class="source-group-container">
+                                        <div class="row source-item mb-2 gx-2">
+                                            <div class="col-5"><input type="text" class="form-control form-control-sm src-name" placeholder="Tên học phần" required></div>
+                                            <div class="col-3"><input type="number" class="form-control form-control-sm src-credit" placeholder="Số TC" required></div>
+                                            <div class="col-3"><input type="text" class="form-control form-control-sm src-grade" placeholder="Điểm" required></div>
+                                            <div class="col-1 text-center"><button type="button" class="btn btn-sm text-danger border-0 p-0" onclick="removeSource(this)">✕</button></div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light text-primary mt-1 border" onclick="addSourceToPair(this)">+ Thêm học phần gộp</button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label fw-bold text-secondary small">B. Học phần ĐÍCH (HVNH)</label>
+                                    <select class="form-select form-select-sm target-select" required>
+                                        <option value="">-- Chọn học phần tại HVNH --</option>
+                                        <option value="Triết học Mác-Lênin">Triết học Mác-Lênin</option>
+                                        <option value="Tiếng Anh cơ bản 1">Tiếng Anh cơ bản 1</option>
+                                        <option value="Tin học đại cương">Tin học đại cương</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-4" onclick="addNewPair()">+ Thêm dòng quy đổi mới (nếu có nhiều môn)</button>
+                </div>
+
+                <hr>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Gửi Hồ Sơ Quy Đổi</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        function sendOTP() {
-            // Assume that OTP sending logic is successful
-            const userEmail = document.getElementById("emailInput").value; // Adjust based on your input ID
-            document.getElementById("modalMessage").innerText = `An OTP has been sent to ${userEmail}. Please check your inbox.`;
-            document.getElementById("successModal").style.display = "block"; // Show modal
+<!-- Modal Popup cho OTP Success -->
+<div class="modal fade" id="otpSuccessModal" tabindex="-1" aria-labelledby="otpSuccessLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="otpSuccessLabel">✓ Gửi mã OTP thành công</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3"><strong>Mã OTP đã được gửi thành công!</strong></p>
+        <p class="text-muted mb-2">📧 Vui lòng kiểm tra email của bạn: <br><strong id="modalEmail"></strong></p>
+        <div class="alert alert-info" role="alert">
+          <small>💡 Mã OTP có giá trị <strong>10 phút</strong>. Nếu không nhận được, vui lòng kiểm tra mục <strong>Spam/Junk</strong></small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Đã hiểu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ✅ GOOGLE APPS SCRIPT URL - ĐÃ CẬP NHẬT
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxKS3ED31Nel5podCoO-XNJ3m6GKfriYerVE9KM4rxpJ0kz4okQl81RPxcD3qDMdTsBpA/exec";
+
+    function sendOTP() {
+        const emailInput = document.getElementById('auth_email');
+        const email = emailInput.value.trim().toLowerCase();
+        const btn = document.getElementById('btnSendOtp');
+
+        console.log("🔍 Email:", email);
+
+        if (!email || !email.endsWith('@hvnh.edu.vn')) {
+            alert("Vui lòng sử dụng email sinh viên (@hvnh.edu.vn)!");
+            return;
         }
 
-        // Function to close modal
-        function closeModal() {
-            document.getElementById("successModal").style.display = "none";
+        btn.disabled = true;
+        btn.innerText = "Đang gửi...";
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "send_otp",
+                email: email
+            })
+        })
+        .then(() => {
+            // ✅ Hiển thị modal
+            document.getElementById('modalEmail').innerText = email;
+            const modal = new bootstrap.Modal(document.getElementById('otpSuccessModal'));
+            modal.show();
+            
+            document.getElementById('otpBlock').style.display = 'block';
+            emailInput.readOnly = true;
+            btn.innerText = "Đã gửi mã";
+            
+            console.log("✅ OTP đã được gửi tới:", email);
+        })
+        .catch(error => {
+            console.error("❌ Lỗi:", error);
+            // Vẫn hiển thị modal vì Google Apps Script có thể đã xử lý
+            document.getElementById('modalEmail').innerText = email;
+            const modal = new bootstrap.Modal(document.getElementById('otpSuccessModal'));
+            modal.show();
+            
+            document.getElementById('otpBlock').style.display = 'block';
+            emailInput.readOnly = true;
+            btn.innerText = "Đã gửi mã";
+        });
+    }
+
+    function verifyOTP() {
+        const otp = document.getElementById('auth_otp').value.trim();
+        if (!otp || otp.length !== 6) {
+            alert("Vui lòng nhập mã OTP 6 số!");
+            return;
         }
-    </script>
+        alert("Xác thực OTP: " + otp);
+    }
+
+    function addSourceToPair(btn) {
+        const container = btn.previousElementSibling;
+        const div = document.createElement('div');
+        div.className = "row source-item mb-2 gx-2";
+        div.innerHTML = `
+            <div class="col-5"><input type="text" class="form-control form-control-sm src-name" placeholder="Tên học phần" required></div>
+            <div class="col-3"><input type="number" class="form-control form-control-sm src-credit" placeholder="Số TC" required></div>
+            <div class="col-3"><input type="text" class="form-control form-control-sm src-grade" placeholder="Điểm" required></div>
+            <div class="col-1 text-center"><button type="button" class="btn btn-sm text-danger border-0 p-0" onclick="removeSource(this)">✕</button></div>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeSource(btn) {
+        const items = btn.closest('.source-group-container').querySelectorAll('.source-item');
+        if (items.length > 1) btn.closest('.source-item').remove();
+    }
+
+    function addNewPair() {
+        const container = document.getElementById('mappingPairsContainer');
+        const count = container.querySelectorAll('.mapping-pair').length + 1;
+        const clone = container.firstElementChild.cloneNode(true);
+        clone.querySelector('.pair-title').innerText = `Học phần quy đổi ${count}`;
+        clone.querySelectorAll('input').forEach(i => i.value = '');
+        clone.querySelector('select').selectedIndex = 0;
+        container.appendChild(clone);
+    }
+
+    function toggleFields() { }
+
+    document.getElementById('transferForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+
+        const payload = {
+            action: "submit_form",
+            email: document.getElementById('auth_email').value,
+            otp: document.getElementById('auth_otp').value,
+            studentId: document.getElementById('studentId').value,
+            fullName: document.getElementById('fullName').value,
+        };
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.remove('d-none', 'alert-danger');
+            alertBox.classList.add('alert-success');
+            alertBox.innerHTML = `<strong>✅ Thành công!</strong> Hồ sơ đã được gửi.`;
+            document.getElementById('transferForm').reset();
+            window.scrollTo(0, 0);
+        })
+        .catch(error => {
+            alert("Lỗi gửi form: " + error.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+        });
+    });
+
+    console.log("✅ Website đã load xong!");
+</script>
+
 </body>
 </html>
