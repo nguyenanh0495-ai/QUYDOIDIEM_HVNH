@@ -1,58 +1,41 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quy đổi Học phần - HVNH</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Your Title</title>
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f4f7f6; }
-        .container { max-width: 900px; margin-top: 30px; margin-bottom: 50px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header-bg { background: linear-gradient(135deg, #003366 0%, #00509d 100%); color: white; border-radius: 15px 15px 0 0; padding: 30px; text-align: center; }
-        .btn-primary { background-color: #00509d; border: none; }
-        .btn-primary:hover { background-color: #003366; }
-        .mapping-pair { transition: all 0.3s ease; }
-        .mapping-pair:hover { border-color: #00509d !important; }
-        #otpBlock { display: none; }
-        .auth-badge { display: inline-block; margin-left: 10px; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; }
-        .auth-badge.pending { background-color: #ffc107; color: white; }
-        .auth-badge.verified { background-color: #28a745; color: white; }
-        .disabled-section { opacity: 0.5; pointer-events: none; }
-        .form-control:disabled, .form-select:disabled { background-color: #e9ecef !important; }
-        @media (max-width: 768px) { .border-end-md { border-end: none !important; border-bottom: 1px solid #dee2e6; margin-bottom: 1rem; padding-bottom: 1rem; } }
+        /* Modal styles */
+        .modal { /* styles */ }
+        .modal-content { /* styles */ }
+        .close { /* styles for close button */ }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <div class="header-bg">
-            <h2 class="fw-bold mb-0">HỆ THỐNG ĐĂNG KÝ QUY ĐỔI HỌC PHẦN</h2>
-            <p class="lead mb-0 mt-2">Học viện Ngân hàng (BAV)</p>
-        </div>
-        
-        <div class="card-body p-4 p-md-5">
-            <div id="alertBox" class="alert d-none mb-4" role="alert"></div>
+    <!-- Your existing HTML content -->
+    <input type="email" id="emailInput" placeholder="Enter your email"> 
+    <button onclick="sendOTP()">Nhận mã OTP</button>
 
-            <form id="transferForm">
-                <div class="row g-3 mb-4">
-                    <h5 class="border-bottom pb-2 mb-3 text-secondary">
-                        Thông tin xác thực
-                        <span id="authBadge" class="auth-badge pending">Chưa xác thực</span>
-                    </h5>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Email sinh viên (@hvnh.edu.vn)</label>
-                        <div class="input-group">
-                            <input type="email" id="auth_email" class="form-control" placeholder="example@hvnh.edu.vn" required>
-                            <button class="btn btn-outline-primary" type="button" id="btnSendOtp" onclick="sendOTP()">Nhận mã OTP</button>
-                        </div>
-                    </div>
-                    <div class="col-md-6" id="otpBlock">
-                        <label class="form-label fw-bold">Mã xác thực OTP</label>
-                        <div class="input-group">
-                            <input type="text" id="auth_otp" class="form-control" placeholder="Nhập 6 số..." maxlength="6">
-                            <button class="btn btn-success" type="button" id="btnVerifyOtp" onclick="verifyOTP()">Xác thực</button>
-                        
-
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        function sendOTP() {
+            // Assume that OTP sending logic is successful
+            const userEmail = document.getElementById("emailInput").value; // Adjust based on your input ID
+            document.getElementById("modalMessage").innerText = `An OTP has been sent to ${userEmail}. Please check your inbox.`;
+            document.getElementById("successModal").style.display = "block"; // Show modal
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById("successModal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
