@@ -71,7 +71,7 @@
                 </div>
 
                 <div id="transferDetails">
-                    <h5 class="border-bottom pb-2 mb-3 text-secondary">Chi tiết Đề xuất Quy đổi</h5>
+                    <h5 class="border-bottom pb-2 mb-3 text-secondary">Đề xuất quy đôi</h5>
                     <div id="mappingPairsContainer">
                         <div class="mapping-pair bg-white border p-3 mb-3 rounded">
                             <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
@@ -92,12 +92,14 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label fw-bold text-secondary small">B. Học phần ĐÍCH (HVNH)</label>
-                                    <select class="form-select form-select-sm target-select" required>
-                                        <option value="">-- Chọn học phần tại HVNH --</option>
-                                        <option value="Triết học Mác-Lênin">Triết học Mác-Lênin</option>
-                                        <option value="Tiếng Anh cơ bản 1">Tiếng Anh cơ bản 1</option>
-                                        <option value="Tin học đại cương">Tin học đại cương</option>
-                                    </select>
+                                    <div class="target-group-container">
+                                        <div class="row target-item mb-2 gx-2">
+                                            <div class="col-6"><input type="text" class="form-control form-control-sm tgt-code" placeholder="Mã học phần" required></div>
+                                            <div class="col-6"><input type="text" class="form-control form-control-sm tgt-name" placeholder="Tên học phần" required></div>
+                                            <div class="col-6"><input type="number" class="form-control form-control-sm tgt-credit" placeholder="Số TC" required></div>
+                                            <div class="col-6"><input type="text" class="form-control form-control-sm tgt-grade" placeholder="Điểm" required></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +144,6 @@
         const clone = container.firstElementChild.cloneNode(true);
         clone.querySelector('.pair-title').innerText = `Học phần quy đổi ${count}`;
         clone.querySelectorAll('input').forEach(i => i.value = '');
-        clone.querySelector('select').selectedIndex = 0;
         container.appendChild(clone);
     }
 
