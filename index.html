@@ -125,5 +125,83 @@
         div.innerHTML = `
             <div class="col-5"><input type="text" class="form-control form-control-sm src-name" placeholder="Tên học phần" required></div>
             <div class="col-3"><input type="number" class="form-control form-control-sm src-credit" placeholder="Số TC" required></div>
-            <div class="col-`
-
+            <div class="col-3"><input type="text" class="form-control form-control-sm src-grade" placeholder="Điểm" required></div>
+            <div class="col-1 text-center"><button type="button" class="btn btn-sm text-danger border-0 p-0" onclick="removeSource(this)">✕</button></div>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeSource(btn) {
+        const items = btn.closest('.source-group-container').querySelectorAll('.source-item');
+        if (items.length > 1) btn.closest('.source-item').remove();
+    }
+
+    function addNewPair() {
+        const container = document.getElementById('mappingPairsContainer');
+        const count = container.querySelectorAll('.mapping-pair').length + 1;
+        const clone = container.firstElementChild.cloneNode(true);
+        clone.querySelector('.pair-title').innerText = `Học phần quy đổi ${count}`;
+        clone.querySelectorAll('input').forEach(i => i.value = '');
+        clone.querySelector('select').selectedIndex = 0;
+        container.appendChild(clone);
+    }
+
+    function toggleFields() {
+        const transferType = document.getElementById('transferType').value;
+        const oldInstitutionBlock = document.getElementById('oldInstitutionBlock');
+        
+        console.log('Transfer Type Selected:', transferType);
+        
+        if (transferType === 'other') {
+            oldInstitutionBlock.style.display = 'block';
+            console.log('Showing old institution field');
+        } else {
+            oldInstitutionBlock.style.display = 'none';
+            console.log('Hiding old institution field');
+        }
+    }
+
+    document.getElementById('transferForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+
+        const payload = {
+            action: "submit_form",
+            email: document.getElementById('auth_email').value,
+            studentId: document.getElementById('studentId').value,
+            fullName: document.getElementById('fullName').value,
+            transferType: document.getElementById('transferType').value,
+            oldInstitution: document.getElementById('oldInstitution').value || "",
+        };
+
+        console.log('Submitting form:', payload);
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.remove('d-none', 'alert-danger');
+            alertBox.classList.add('alert-success');
+            alertBox.innerHTML = `<strong>✅ Thành công!</strong> Hồ sơ đã được gửi.`;
+            document.getElementById('transferForm').reset();
+            window.scrollTo(0, 0);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Lỗi gửi form: " + error.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+        });
+    });
+
+    console.log("✅ Website đã load xong!");
+</script>
+
+</body>
+</html>
